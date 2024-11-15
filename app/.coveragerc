@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = app  # Specify your source directory
+concurrency = gevent
+
+[report]
+omit =
+    */tests/*
+    */migrations/*

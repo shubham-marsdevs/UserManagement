@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  user_crud_assignment:
+    container_name: user_crud_assignment
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "${APP_PORT}:8000"
+    env_file:
+      - env/.env
+    depends_on:
+      - db
+  
+  test-runner:
+    container_name: test_runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    volumes:
+      - .:/app
+    env_file:
+      - env/.db.env
+      - env/.env
+      - app/tests/.env
+    command: poetry run pytest --cov=app --cov-report=term-missing --cov-report=html
+
+  db:
+    image: postgres:13
+    container_name: user_crud_assignment_db
+    env_file:
+      - env/.db.env
+      - env/.env
+      - app/tests/.env
+    ports:
+      - "5432:5432"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    depends_on:
+      - user_crud_assignment
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
